@@ -67,7 +67,7 @@ void* smalloc(size_t tamanho)
     	}
     	    lido = lido->seguinte;
     }	
-        printf("Out of Memory");
+        //printf("Out of Memory");
         return NULL;
 }
 
@@ -81,22 +81,28 @@ void sfree(void* ptr)
     	{
     	    lido->is_free = 1;
     	    //Coalescência
-    	    if(lido->anteriro != NULL && lido->anterior->is_free == 1)
+    	    if(lido->anterior != NULL && lido->anterior->is_free == 1)
     	    {
     	    	lido->mem_ptr = lido->anterior->mem_ptr;
     	    	lido->size = lido->size + lido->anterior->size + sizeof(struct mem_block);
-    	    	lido->anterior = (lido->anterior)->anterior;
+    	    	lido->anterior = lido->anterior->anterior;
+    	    	if (lido->anterior != NULL) {
+                   lido->anterior->seguinte = lido;
+                }
     	    }
     	    
     	    if(lido->seguinte != NULL && lido->seguinte->is_free == 1)
     	    {
     	    	lido->size = sizeof(struct mem_block) + lido->seguinte->size;
     	    	lido->seguinte = lido->seguinte->seguinte;
+    	    	if (lido->seguinte != NULL) {
+                    lido->seguinte->anterior = lido;
+                }
     	    }
-        
+        return;
     	}
-    }
-    
+    	lido = lido->seguinte;
+    }  
 }
 
 int main(int argc, char *argv[]) {
@@ -135,7 +141,7 @@ int main(int argc, char *argv[]) {
                 size = allocations[allocCount].size;
                 currentMemory -= size;
                 /* Change free() by sfree() */
-                free(allocations[allocCount].ptr);
+                sfree(allocations[allocCount].ptr);
                 printf("Free %u bytes, total %u, position %i\n", size, currentMemory, allocCount);
             }
         }
