@@ -32,7 +32,7 @@ void initialize_memory()
     primeiro = (struct mem_block*)sbrk(sizeof(struct mem_block));//Aloca um ponteiro para um espaço da estrutura
     primeiro->is_free = 1;
     primeiro->size = MEMORIA - sizeof(struct mem_block);
-    primeiro->mem_ptr = (void*)((char*)primeiro + sizeof(struct mem_block));//Colocamos char para fazer aritimética de ponteiros
+    primeiro->mem_ptr = (void*)((char*)primeiro + sizeof(struct mem_block));//Colocamos char para fazer aritimética de ponteiros, apontando depois do cabeçalho
     primeiro->seguinte = NULL;
     primeiro->anterior = NULL;
 }
@@ -47,10 +47,56 @@ void* smalloc(size_t tamanho)
     	{
     	    if(lido->size > tamanho + sizeof(struct mem_block)) //garantindo q o bloco suporte o cabeçalho e o arquivo
     	    {
-    	    }
-     	 
+    	        //Divide blocos
+    	    	struct mem_block* novo = (struct mem_block*)((char*)lido->mem_ptr + tamanho);
+    	    	novo->is_free = 1;
+    	    	novo->size = lido->size -tamanho -sizeof(struct mem_block); //tamanho anterior - tamanho armazenado - cabeçalho do novo bloco
+    	    	novo->mem_ptr = (void*)((char*)novo + sizeof(struct mem_block));
+    	    	novo->seguinte = lido->seguinte;//O final do lido é o mesmo final do novo
+    	    	novo->anterior = lido;
+    	    	
+    	    	if(lido->seguinte != NULL)
+    	    	{
+    		    lido->seguinte->anterior = novo;//Atualizando a variavel anterior no bloco seguinte
+    	    	}
+    	    	lido->seguinte = novo;
+    	    	lido->size = tamanho; 	//Atualizando a estrutura atual
+    	    }	 
+    	        lido->is_free = 0;
+    	        return lido->mem_ptr; //Sai do while, retorno da função
     	}
+    	    lido = lido->seguinte;
     }	
+        printf("Out of Memory");
+        return NULL;
+}
+
+void sfree(void* ptr)
+{
+    struct mem_block* lido = primeiro;
+    
+    while(lido != NULL)
+    {
+    	if(lido->mem_ptr == ptr)
+    	{
+    	    lido->is_free = 1;
+    	    //Coalescência
+    	    if(lido->anteriro != NULL && lido->anterior->is_free == 1)
+    	    {
+    	    	lido->mem_ptr = lido->anterior->mem_ptr;
+    	    	lido->size = lido->size + lido->anterior->size + sizeof(struct mem_block);
+    	    	lido->anterior = (lido->anterior)->anterior;
+    	    }
+    	    
+    	    if(lido->seguinte != NULL && lido->seguinte->is_free == 1)
+    	    {
+    	    	lido->size = sizeof(struct mem_block) + lido->seguinte->size;
+    	    	lido->seguinte = lido->seguinte->seguinte;
+    	    }
+        
+    	}
+    }
+    
 }
 
 int main(int argc, char *argv[]) {
@@ -65,7 +111,7 @@ int main(int argc, char *argv[]) {
     }
 
     maxMemory = atoi(argv[1]);
-    initialize_memory()
+    initialize_memory();
     srand(time(NULL));
 
     while(1){
@@ -77,7 +123,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             /* Change malloc() by smalloc() */
-            allocations[allocCount].ptr = malloc(size);
+            allocations[allocCount].ptr = smalloc(size);
             allocations[allocCount].size = size;
             currentMemory += size;
             allocCount++;
