@@ -25,11 +25,6 @@ int main(int argc, char **argv) {
     // O primeiro argumento é o arquivo de saída ou opção de listagem -l
     char *opt = argv[1];
 
-    if (strcmp(opt, "-l") == 0) {
-        // Listar todos os arquivos e tamanhos no arquivamento
-        return 0;
-    }
-
     // Criar arquivo. 
     if (strcmp(opt, "-c") == 0){
         char *output_file = argv[2];
@@ -129,6 +124,32 @@ int main(int argc, char **argv) {
     	printf("Erro, arquivo não encontrado");
         
     }
+    
+    if (strcmp(opt, "-l") == 0) {
+        // Listar todos os arquivos e tamanhos no arquivamento
+        
+        char *extract_file = argv[2];
+        
+        FILE *archive_fp = fopen(extract_file, "rb");
+        
+        struct file_header cabecalho;
+        
+        while (fread(&cabecalho, sizeof(struct file_header), 1, archive_fp) == 1) {
+      		char *buffer = (char *)malloc(cabecalho.filesize);
+            	fread(buffer, 1, cabecalho.filesize, archive_fp);
+            	
+            	printf("%s\n", cabecalho.name);
+            	printf("%d\n", cabecalho.filesize);
+            	printf("%s\n", buffer);
+            	free(buffer);
+    	}
+    		
+        	fclose(archive_fp);	
+        
+        
+        return 0;
+    }
+
 
     return 0;
 }
