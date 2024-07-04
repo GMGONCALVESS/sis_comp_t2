@@ -1,0 +1,36 @@
+void extract_file(char *archive_file, char *file_name) {
+    FILE *archive_fp = fopen(archive_file, "rb");
+    if (!archive_fp) {
+        perror("Erro ao abrir arquivo de arquivamento");
+        return;
+    }
+
+    struct file_header header;
+    while (fread(&header, sizeof(struct file_header), 1, archive_fp)) {
+        if (strcmp(header.name, file_name) == 0) {
+            char *buffer = (char *)malloc(header.file_size);
+            fread(buffer, 1, header.file_size, archive_fp);
+
+            FILE *out_fp = fopen(file_name, "wb");
+            if (!out_fp) {
+                perror("Erro ao criar arquivo de saída");
+                free(buffer);
+                fclose(archive_fp);
+                return;
+            }
+
+            fwrite(buffer, 1, header.file_size, out_fp);
+
+            free(buffer);
+            fclose(out_fp);
+            printf("Arquivo %s extraído com sucesso.\n", file_name);
+            fclose(archive_fp);
+            return;
+        } else {
+            fseek(archive_fp, header.file_size, SEEK_CUR);
+        }
+    }
+
+    printf("Arquivo %s não encontrado no arquivamento.\n", file_name);
+    fclose(archive_fp);
+}
