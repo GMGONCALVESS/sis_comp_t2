@@ -1,0 +1,15 @@
+void list_files(char *archive_file) {
+    FILE *archive_fp = fopen(archive_file, "rb");
+    if (!archive_fp) {
+        perror("Erro ao abrir arquivo de arquivamento");
+        return;
+    }
+
+    struct file_header header;
+    while (fread(&header, sizeof(struct file_header), 1, archive_fp)) {
+        printf("Arquivo: %s, Tamanho: %u bytes\n", header.name, header.file_size);
+        fseek(archive_fp, header.file_size, SEEK_CUR);
+    }
+
+    fclose(archive_fp);
+}
