@@ -6,8 +6,8 @@
 
 #pragma pack (push,1)
 struct file_header {
- 	char name [MAXNAME] ; // Nome do a r q u i v o
- 	unsigned int filesize ; // Tamanho do a r q u i v o em b y t e s
+ 	char name [MAXNAME] ; // Nome 
+ 	unsigned int filesize ; // Tamanho 
 };
 #pragma pack (pop)
 
@@ -65,9 +65,69 @@ int main(int argc, char **argv) {
 
     // Extrair arquivo. 
     if (strcmp(opt, "-e") == 0){
+    
         char *extract_file = argv[2];//./saida/saida1.txt
-        char **input_files = &argv[3];//teste1.txt
+        char *file_name = argv[3];//teste1.txt --> ./entrada/teste1.txt
+        
+        
         printf("Arquivo para extrair: %s\n", extract_file);
+        
+        
+        FILE *archive_fp = fopen(extract_file, "rb");
+        //int ptr1 = fseek(archive_fp, 0, SEEK_END);
+        
+        struct file_header cabecalho;
+        
+        //fread(&cabecalho, sizeof(struct file_header), 1, archive_fp)
+    	while (fread(&cabecalho, sizeof(struct file_header), 1, archive_fp) == 1) {
+    		//printf("%s\n",file_name);
+    		//printf("%s\n",cabecalho.name);
+    		
+        	if (strcmp(cabecalho.name, file_name) == 0) {
+            		char *buffer = (char *)malloc(cabecalho.filesize);
+            		fread(buffer, 1, cabecalho.filesize, archive_fp);
+            		
+            		//printf("%s\n", buffer);
+
+            		//FILE *out_fp = fopen(file_name, "wb");//./entrada/teste1.txt
+            		//if (!out_fp) {
+                	//	perror("Erro ao criar arquivo de saída");
+                	//	free(buffer);
+                	//	fclose(archive_fp);
+            		//}
+			
+			FILE *lido = fopen("./lidos/lido.txt","wb");
+			//fprintf(lido, buffer);
+			if (!lido) {
+                		perror("Erro ao criar arquivo de saída");
+                		free(buffer);
+                		fclose(archive_fp);
+            		}
+			
+            		//fwrite(buffer, 1, cabecalho.filesize, out_fp);
+			fwrite(buffer, 1, cabecalho.filesize, lido);
+            		free(buffer);
+            		//fclose(out_fp);//Salvar na pasta de lidos
+            		fclose(lido);
+            		printf("Arquivo %s extraído com sucesso.\n", file_name);
+            		fclose(archive_fp);
+            		return 0;
+       	 	}else{
+       	 		fseek(archive_fp, cabecalho.filesize, SEEK_CUR);
+       	     		//int ptr2 = fseek(archive_fp, cabecalho.filesize, SEEK_CUR);
+       	     		////printf("%d",*ptr1);
+       	     		//printf("%d",*ptr2);
+       	     		//if (*ptr2 >= *ptr1){
+       	     			
+       	     		//	return 1;
+       	     		//}
+       	     		//precisamos verificar onde esta o ponteiro
+       	     		//se ftell indicar final
+        	}
+        	
+    	}
+    	printf("Erro, arquivo não encontrado");
+        
     }
 
     return 0;
