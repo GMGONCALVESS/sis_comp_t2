@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define MAXNAME 256
 
 #pragma pack (push,1)
-struct fileheader {
+struct file_header {
  	char name [MAXNAME] ; // Nome do a r q u i v o
  	unsigned int filesize ; // Tamanho do a r q u i v o em b y t e s
 };
@@ -34,19 +35,38 @@ int main(int argc, char **argv) {
         char *output_file = argv[2];
         char **input_files = &argv[3];
         int num_input_files = argc - 3;
+        
+        FILE *out_fp = fopen(output_file, "wb");
 
         printf("Arquivo de saída: %s\n", output_file);
         for(int i=0; i < num_input_files; i++) {
             printf("Arquivo de entrada %d: %s\n", i, input_files[i]);
-            struct fileheader* cabeca = NULL;
-            cabeca->name = input_files[i];
-            cabeca->size = tam do arquivo
+            
+            FILE *in_fp = fopen(input_files[i], "rb");
+            fseek(in_fp, 0, SEEK_END);//Bloco de código para pegar o tamanho da função
+            unsigned int file_size = ftell(in_fp);
+	    fseek(in_fp, 0, SEEK_SET);
+	    
+	    struct file_header header;//Criando o cabeçalho
+            strncpy(header.name, input_files[i], MAXNAME);
+            header.filesize = file_size;
+            
+            fwrite(&header, sizeof(struct file_header), 1, out_fp);
+
+            char *buffer = (char *)malloc(file_size);
+            fread(buffer, 1, file_size, in_fp);
+            fwrite(buffer, 1, file_size, out_fp);
+
+            free(buffer);
+            fclose(in_fp);
         }
+        fclose(out_fp);
     }
 
     // Extrair arquivo. 
     if (strcmp(opt, "-e") == 0){
-        char *extract_file = argv[2];
+        char *extract_file = argv[2];//./saida/saida1.txt
+        char **input_files = &argv[3];//teste1.txt
         printf("Arquivo para extrair: %s\n", extract_file);
     }
 
