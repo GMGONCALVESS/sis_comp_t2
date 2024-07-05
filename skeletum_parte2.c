@@ -138,9 +138,9 @@ int main(int argc, char **argv) {
       		char *buffer = (char *)malloc(cabecalho.filesize);
             	fread(buffer, 1, cabecalho.filesize, archive_fp);
             	
-            	printf("%s\n", cabecalho.name);
-            	printf("%d\n", cabecalho.filesize);
-            	printf("%s\n", buffer);
+            	printf("Nome do arquivo: %s\n", cabecalho.name);
+            	printf("Tamanho do arquivo: %d\n", cabecalho.filesize);
+            	// printf("%s\n", buffer);
             	free(buffer);
     	}
     		

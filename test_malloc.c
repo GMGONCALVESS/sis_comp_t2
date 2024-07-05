@@ -86,9 +86,9 @@ void sfree(void* ptr)
     	    {
     	    	lido->mem_ptr = lido->anterior->mem_ptr;
     	    	lido->size = lido->size + lido->anterior->size + sizeof(struct mem_block);
-    	    	lido->anterior = lido->anterior->anterior;
-    	    	if (lido->anterior != NULL) {
-                   lido->anterior->seguinte = lido;
+    	    	lido->anterior = lido->anterior->anterior; // O anterior torna-se o anterior dele mesmo
+    	    	if (lido->anterior != NULL) { 
+                   lido->anterior->seguinte = lido; 
                 }
     	    }
     	    
