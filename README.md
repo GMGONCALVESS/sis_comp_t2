@@ -19,4 +19,7 @@
     trata-se da parte 2 do trabalho.
 
 ### Obervação
-Na parte 2, ao executar a função de extação de arquivo "-e" o mesmo é extraído para o diretório "./lidos/lido.txt".
+Na parte 2, ao executar a função de extação de arquivo "-e" o mesmo é extraído para o diretório
+```
+./lidos/lido.txt
+```
